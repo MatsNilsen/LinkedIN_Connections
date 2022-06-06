@@ -24,6 +24,8 @@ class SearchPageLocators:
     NEXT_BUTTON = (By.XPATH, '//button[@aria-label="Next"]')
     ONLY_EMAIL = (By.XPATH, '//label[@for="email"]')
     CLOSE_BUTTON = (By.XPATH, '//button[@data-test-modal-close-btn]')
+    CONNECTIONS_LIMIT = (By.XPATH, '//h2[@class="ip-fuse-limit-alert__header t-20 t-black ph4" '
+                                   'and text()="You’ve reached the weekly invitation limit"]')
 
 
 class Linkedin:
@@ -80,6 +82,11 @@ class Linkedin:
                 self.browser.find_element(*SearchPageLocators.CLOSE_BUTTON).click()
                 continue
             self.browser.find_element(*SearchPageLocators.SEND_BUTTON).click()
+            if self.is_displayed(*SearchPageLocators.CONNECTIONS_LIMIT):
+                print(f'>>> {self.sent_connections} connections sent successfully\n'
+                      f'>>> You’ve reached the weekly invitation limit\n'
+                      f'>>> Please try again next week')
+                exit(0)
             index += 1
             self.sent_connections += 1
             time.sleep(random.randint(1, 3))
@@ -119,7 +126,7 @@ if __name__ == "__main__":
     parser.add_argument('--webdriver_path', help='Path to Webdriver', type=str, required=True)
     args = parser.parse_args()
 
-    Linkedin(args.login, args.password, args.connections, args.search_url, args.webdriver_path).open_browser()\
-        .fill_creds()\
-        .click_sign_in()\
+    Linkedin(args.login, args.password, args.connections, args.search_url, args.webdriver_path).open_browser() \
+        .fill_creds() \
+        .click_sign_in() \
         .connect_people()
