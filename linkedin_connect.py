@@ -22,6 +22,8 @@ class SearchPageLocators:
     CONNECT_BUTTON = (By.XPATH, '//span[@class="artdeco-button__text" and text()="Connect"]')
     SEND_BUTTON = (By.XPATH, '//span[@class="artdeco-button__text" and text()="Send"]')
     NEXT_BUTTON = (By.XPATH, '//button[@aria-label="Next"]')
+    ONLY_EMAIL = (By.XPATH, '//label[@for="email"]')
+    CLOSE_BUTTON = (By.XPATH, '//button[@data-test-modal-close-btn]')
 
 
 class Linkedin:
@@ -34,6 +36,7 @@ class Linkedin:
         self.webdriver_path = webdriver_path
         self.browser = webdriver.Chrome(webdriver_path)
         self.browser.implicitly_wait(5)
+        self.sent_connections = 0
 
     def open_browser(self):
         self.browser.get(sign_in_url)
@@ -54,7 +57,7 @@ class Linkedin:
             print(">>> That's not the right password.")
             self.browser.quit()
             exit(0)
-        time.sleep(random.randint(16, 20))
+        time.sleep(random.randint(10, 15))
         self.browser.get(self.search_url)
         return self
 
@@ -73,9 +76,13 @@ class Linkedin:
         for button in connect_buttons:
             button.click()
             time.sleep(random.randint(1, 2))
+            if self.is_displayed(*SearchPageLocators.ONLY_EMAIL):
+                self.browser.find_element(*SearchPageLocators.CLOSE_BUTTON).click()
+                continue
             self.browser.find_element(*SearchPageLocators.SEND_BUTTON).click()
             index += 1
-            time.sleep(random.randint(1, 5))
+            self.sent_connections += 1
+            time.sleep(random.randint(1, 3))
         return index
 
     def connect_people(self):
@@ -83,23 +90,22 @@ class Linkedin:
         index = 0
 
         while index < self.connections:
-            if not self.is_displayed(*SearchPageLocators.CONNECT_BUTTON):
-                self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                time.sleep(0.5)
-                self.browser.find_element(*SearchPageLocators.NEXT_BUTTON).click()
-            else:
-                connect_buttons = self.browser.find_elements(*SearchPageLocators.CONNECT_BUTTON)
-                if len(connect_buttons) > self.connections:
+            connect_buttons = self.browser.find_elements(*SearchPageLocators.CONNECT_BUTTON)
+            if len(connect_buttons) > self.connections - index:
 
-                    if index == 0:
-                        index += self.send_connect(connect_buttons[:self.connections])
-                    else:
-                        index += self.send_connect(connect_buttons[:self.connections - index])
-
+                if index == 0:
+                    index += self.send_connect(connect_buttons[:self.connections])
                 else:
-                    index += self.send_connect(connect_buttons)
+                    index += self.send_connect(connect_buttons[:self.connections - index])
 
-        print(f'>>> Connections sent successfully')
+            else:
+                index += self.send_connect(connect_buttons)
+
+            self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(0.5)
+            self.browser.find_element(*SearchPageLocators.NEXT_BUTTON).click()
+
+        print(f'>>> {self.sent_connections} connections sent successfully')
         self.browser.quit()
         return self
 

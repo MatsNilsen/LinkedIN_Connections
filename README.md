@@ -16,7 +16,7 @@ Just clone the project and run it with the following parameters:
 
 Example for running:
 ```sh
- python3 linkedin_connect.py --login=johnsmith@gmail.com --password=qwerty --connections=30 --search_url="https://www.linkedin.com/search/results/people/?geoUrn=%5B%22105080838%22%5D&industry=%5B%2296%22%5D&keywords=human%20resources&origin=FACETED_SEARCH&serviceCategory=%5B%2249%22%5D&sid=RZV"
+ python3 linkedin_connect.py --login=johnsmith@gmail.com --password=qwerty --connections=30 --search_url="https://www.linkedin.com/search/results/people/?geoUrn=%5B%22105080838%22%5D&industry=%5B%2296%22%5D&keywords=human%20resources&origin=FACETED_SEARCH&serviceCategory=%5B%2249%22%5D&sid=RZV" --webdriver_path=/Users/user/chromedriver
 ```
 
 ## License
