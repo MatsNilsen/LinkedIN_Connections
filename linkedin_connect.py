@@ -5,6 +5,7 @@ import argparse
 import time
 from selenium import webdriver
 import random
+import subprocess
 from selenium.webdriver.common.by import By
 
 sign_in_url = 'https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin'
@@ -39,6 +40,11 @@ class Linkedin:
         self.browser = webdriver.Chrome(webdriver_path)
         self.browser.implicitly_wait(5)
         self.sent_connections = 0
+
+    def clear_console(self):
+        tput = subprocess.Popen(['tput', 'cols'], stdout=subprocess.PIPE)
+        cols = int(tput.communicate()[0].strip())
+        print("\033[A{}\033[A".format(' ' * cols))
 
     def open_browser(self):
         self.browser.get(sign_in_url)
@@ -83,12 +89,16 @@ class Linkedin:
                 continue
             self.browser.find_element(*SearchPageLocators.SEND_BUTTON).click()
             if self.is_displayed(*SearchPageLocators.CONNECTIONS_LIMIT):
-                print(f'>>> {self.sent_connections} connections sent successfully\n'
+                self.clear_console()
+                print(f'>>> {self.sent_connections} connections have been sent successfully\n'
                       f'>>> You’ve reached the weekly invitation limit\n'
                       f'>>> Please try again next week')
                 exit(0)
             index += 1
             self.sent_connections += 1
+            if self.sent_connections != 0:
+                self.clear_console()
+            print(f'>>> {self.sent_connections} connections have been sent')
             time.sleep(random.randint(1, 3))
         return index
 
